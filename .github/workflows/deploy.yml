@@ -40,7 +40,7 @@ jobs:
                   username: ${{ secrets.USER }}
                   key: ${{ secrets.SSH_KEY }}
                   source: "skarmdump-backend.tar.gz"
-                  target: "/opt/skarmdump-backend"
+                  target: "~/skarmdump-backend"
 
             - name: Load image and start container
               uses: appleboy/ssh-action@v1.0.0
@@ -50,7 +50,7 @@ jobs:
                   key: ${{ secrets.SSH_KEY }}
                   script: |
                       set -e
-                      cd /opt/skarmdump-backend
+                      cd ~/skarmdump-backend
 
                       echo "--- Загрузка образа ---"
                       gunzip -c skarmdump-backend.tar.gz | docker load
@@ -63,8 +63,8 @@ jobs:
                       docker run -d --restart unless-stopped \
                           --name skarmdump-backend \
                           -p 127.0.0.1:8081:8080 \
-                          --env-file /opt/skarmdump-backend/.env \
-                          -v /opt/skarmdump-backend/img:/app/img \
+                          --env-file ~/skarmdump-backend/.env \
+                          -v ~/skarmdump-backend/img:/app/img \
                           skarmdump-backend:latest
 
                       echo "--- Check ---"
