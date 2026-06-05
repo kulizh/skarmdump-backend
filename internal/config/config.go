@@ -14,6 +14,8 @@ type Config struct {
 	S3Bucket string
 	S3Region string
 	S3URL    string
+
+	APIKey string
 }
 
 func Load() *Config {
@@ -27,6 +29,8 @@ func Load() *Config {
 		S3Bucket: get("S3_BUCKET", ""),
 		S3Region: get("S3_REGION", ""),
 		S3URL:    get("S3_URL", ""),
+
+		APIKey: get("API_KEY", ""),
 	}
 }
 

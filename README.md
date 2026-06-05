@@ -26,6 +26,7 @@ AWS_SECRET_ACCESS_KEY=
 | `PORT` | нет | `8080` | Порт внутри контейнера |
 | `DOMAIN` | да | — | Базовый URL (возвращается в ответе) |
 | `LOCAL_PATH` | нет | `./img` | Директория для локального хранения |
+| `API_KEY` | нет | — | Ключ авторизации (см. раздел Авторизация) |
 | `S3_BUCKET` | для S3 | — | Имя S3-бакета |
 | `S3_REGION` | для S3 | — | Регион S3 |
 | `S3_URL` | для S3 | — | Публичный URL бакета |
@@ -56,11 +57,22 @@ make compose-down
 
 ## API
 
+### Авторизация
+
+Если в `.env` задан `API_KEY`, все запросы к `/upload` должны содержать заголовок:
+
+```
+Authorization: <значение API_KEY>
+```
+
+Если `API_KEY` пустой (не задан) — авторизация не требуется.
+
 ### Загрузить изображение
 
 ```
 POST /upload
 Content-Type: multipart/form-data
+Authorization: <API_KEY>
 ```
 
 **Поля формы:**
@@ -93,6 +105,8 @@ curl -X POST http://localhost:8080/upload \
 
 | HTTP | `error` | `message` | Причина |
 |---|---|---|---|
+| 401 | `auth_required` | `authorization header is required` | Не передан заголовок `Authorization` |
+| 403 | `invalid_key` | `invalid API key` | Неверный API-ключ |
 | 400 | `missing_image` | `image file is required` | Не передан файл в поле `image` |
 | 400 | `read_error` | `cannot read uploaded image` | Ошибка чтения файла |
 | 400 | `invalid_image` | `only PNG files are accepted` | Файл не является PNG |

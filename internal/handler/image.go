@@ -28,7 +28,27 @@ func ip(r *http.Request) string {
 	return ip
 }
 
+func (h *Handler) authenticate(r *http.Request) (int, string, string) {
+	if h.cfg.APIKey == "" {
+		return http.StatusOK, "", "" // ключ не настроен — пропускаем
+	}
+
+	key := r.Header.Get("Authorization")
+	if key == "" {
+		return http.StatusUnauthorized, "auth_required", "authorization header is required"
+	}
+	if key != h.cfg.APIKey {
+		return http.StatusForbidden, "invalid_key", "invalid API key"
+	}
+	return http.StatusOK, "", ""
+}
+
 func (h *Handler) Upload(w http.ResponseWriter, r *http.Request) {
+	if status, code, msg := h.authenticate(r); status != http.StatusOK {
+		response.Error(w, status, code, msg)
+		return
+	}
+
 	if !h.rl.Allow(ip(r), time.Second) {
 		response.Error(w, http.StatusTooManyRequests, "rate_limit", "rate limit exceeded")
 		return
