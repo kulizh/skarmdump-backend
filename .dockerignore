@@ -1,0 +1,11 @@
+.env
+.git
+.gitignore
+.github
+.vscode
+.idea
+.DS_Store
+*.md
+img/
+skarmdump-backend
+test.png

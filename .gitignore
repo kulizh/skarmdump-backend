@@ -1,0 +1,23 @@
+# Environment files
+.env
+
+# Build output
+skarmdump-backend
+*.exe
+*.out
+*.log
+
+# Local storage
+img/*
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Local testing
+curl_example
+test.png
+test.png
+nginx.example.conf
