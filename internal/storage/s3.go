@@ -33,3 +33,12 @@ func (s *S3) Save(hash string, data []byte) error {
 	})
 	return err
 }
+
+func (s *S3) Exists(hash string) bool {
+	key := hash + ".png"
+	_, err := s.client.HeadObject(context.TODO(), &s3.HeadObjectInput{
+		Bucket: &s.cfg.S3Bucket,
+		Key:    &key,
+	})
+	return err == nil
+}

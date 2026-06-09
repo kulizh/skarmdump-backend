@@ -3,13 +3,15 @@ package config
 import (
 	"bufio"
 	"os"
+	"strconv"
 	"strings"
 )
 
 type Config struct {
-	Port      string
-	Domain    string
-	LocalPath string
+	Port       string
+	Domain     string
+	LocalPath  string
+	HashLength int
 
 	S3Bucket string
 	S3Region string
@@ -30,7 +32,8 @@ func Load() *Config {
 		S3Region: get("S3_REGION", ""),
 		S3URL:    get("S3_URL", ""),
 
-		APIKey: get("API_KEY", ""),
+		APIKey:     get("API_KEY", ""),
+		HashLength: getInt("HASH_LENGTH", 12),
 	}
 }
 
@@ -66,6 +69,15 @@ func loadDotEnv(path string) {
 func get(k, d string) string {
 	if v := os.Getenv(k); v != "" {
 		return v
+	}
+	return d
+}
+
+func getInt(k string, d int) int {
+	if v := os.Getenv(k); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
 	}
 	return d
 }

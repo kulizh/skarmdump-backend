@@ -21,3 +21,9 @@ func (l *Local) Save(hash string, data []byte) error {
 	}
 	return os.WriteFile(path, data, 0644)
 }
+
+func (l *Local) Exists(hash string) bool {
+	path := filepath.Join(l.base, hash+".png")
+	_, err := os.Stat(path)
+	return err == nil
+}

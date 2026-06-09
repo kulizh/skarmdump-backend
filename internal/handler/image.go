@@ -4,9 +4,11 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"skarmdump-backend/internal/config"
+	"skarmdump-backend/internal/page"
 	"skarmdump-backend/internal/ratelimit"
 	"skarmdump-backend/internal/response"
 	"skarmdump-backend/internal/service"
@@ -89,5 +91,19 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.NotFound(w, r) // nginx будет отдавать
+	hash := strings.TrimPrefix(r.URL.Path, "/")
+	hash = strings.TrimSuffix(hash, "/")
+
+	if !h.svc.Exists(hash) {
+		response.Error(w, http.StatusNotFound, "not_found", "screenshot not found")
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	page.RenderOGPage(w, page.OGData{
+		Title:   "Screenshot " + hash,
+		ImgURL:  page.OGImgURL(h.cfg.Domain, hash),
+		PageURL: page.OGPageURL(h.cfg.Domain, hash),
+	})
 }
