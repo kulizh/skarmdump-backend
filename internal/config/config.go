@@ -2,6 +2,7 @@ package config
 
 import (
 	"bufio"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -10,6 +11,7 @@ import (
 type Config struct {
 	Port       string
 	Domain     string
+	SiteName   string
 	LocalPath  string
 	HashLength int
 
@@ -23,9 +25,12 @@ type Config struct {
 func Load() *Config {
 	loadDotEnv(".env")
 
+	domain := strings.TrimRight(get("DOMAIN", "http://localhost:8080"), "/")
+
 	return &Config{
 		Port:      get("PORT", "8080"),
-		Domain:    strings.TrimRight(get("DOMAIN", "http://localhost:8080"), "/"),
+		Domain:    domain,
+		SiteName:  siteName(domain),
 		LocalPath: get("LOCAL_PATH", "./img"),
 
 		S3Bucket: get("S3_BUCKET", ""),
@@ -80,4 +85,20 @@ func getInt(k string, d int) int {
 		}
 	}
 	return d
+}
+
+func siteName(domain string) string {
+	u, err := url.Parse(domain)
+	if err != nil || u.Host == "" {
+		return "Skarmdump app"
+	}
+
+	host := u.Host
+	if idx := strings.LastIndex(host, ":"); idx > 0 {
+		host = host[:idx]
+	}
+	if host == "" || host == "localhost" {
+		return "Skarmdump app"
+	}
+	return host
 }

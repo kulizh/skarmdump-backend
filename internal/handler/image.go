@@ -102,8 +102,9 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	page.RenderOGPage(w, page.OGData{
-		Title:   "Screenshot " + hash,
-		ImgURL:  page.OGImgURL(h.cfg.Domain, hash),
-		PageURL: page.OGPageURL(h.cfg.Domain, hash),
+		Title:    "Screenshot " + hash,
+		ImgURL:   page.OGImgURL(h.cfg.Domain, hash),
+		PageURL:  page.OGPageURL(h.cfg.Domain, hash),
+		SiteName: h.cfg.SiteName,
 	})
 }
