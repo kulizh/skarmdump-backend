@@ -29,7 +29,6 @@ const ogTemplate = `<!DOCTYPE html>
 <meta name="twitter:title" content="{{.Title}}">
 <meta name="twitter:description" content="Share screenshot">
 <meta name="twitter:image" content="{{.ImgURL}}">
-<meta http-equiv="refresh" content="0; url={{.ImgURL}}">
 </head>
 <body>
 <img src="{{.ImgURL}}" alt="{{.Title}}" style="max-width:100%;height:auto;">
