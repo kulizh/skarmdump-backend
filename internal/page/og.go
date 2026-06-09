@@ -24,9 +24,8 @@ const ogTemplate = `<!DOCTYPE html>
 <meta property="og:url" content="{{.PageURL}}">
 <meta property="og:type" content="website">
 {{if .SiteName}}<meta property="og:site_name" content="{{.SiteName}}">
-<meta name="twitter:title" content="{{.Title}}">
-<meta name="twitter:image" content="{{.ImgURL}}">
-<meta name="twitter:card" content="photo">
+{{end}}<meta name="twitter:title" content="{{.Title}}"><meta name="twitter:image" content="{{.ImgURL}}">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <img src="{{.ImgURL}}" alt="{{.Title}}" style="max-width:100%;height:auto;">
