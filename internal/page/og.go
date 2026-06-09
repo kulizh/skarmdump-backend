@@ -22,9 +22,7 @@ const ogTemplate = `<!DOCTYPE html>
 <meta property="og:description" content="Share screenshot">
 <meta property="og:image" content="{{.ImgURL}}">
 <meta property="og:url" content="{{.PageURL}}">
-<meta property="og:type" content="image">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{.Title}}">
 <meta name="twitter:description" content="Share screenshot">
