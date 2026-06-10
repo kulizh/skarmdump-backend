@@ -9,11 +9,13 @@ import (
 type Local interface {
 	Save(hash string, data []byte) error
 	Exists(hash string) bool
+	Read(hash string) ([]byte, error)
 }
 
 type S3 interface {
 	Save(hash string, data []byte) error
 	Exists(hash string) bool
+	Read(hash string) ([]byte, error)
 }
 
 type Service struct {
@@ -28,6 +30,13 @@ func New(l Local, s3 S3, hashLength int) *Service {
 
 func (s *Service) Exists(hash string) bool {
 	return s.local.Exists(hash) || s.s3.Exists(hash)
+}
+
+func (s *Service) Get(hash string) ([]byte, error) {
+	if s.local.Exists(hash) {
+		return s.local.Read(hash)
+	}
+	return s.s3.Read(hash)
 }
 
 func (s *Service) Upload(data []byte, useS3 bool) (string, error) {

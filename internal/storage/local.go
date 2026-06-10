@@ -27,3 +27,8 @@ func (l *Local) Exists(hash string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }
+
+func (l *Local) Read(hash string) ([]byte, error) {
+	path := filepath.Join(l.base, hash+".png")
+	return os.ReadFile(path)
+}

@@ -21,6 +21,7 @@ const ogTemplate = `<!DOCTYPE html>
 <title>{{.Title}}</title>
 <meta property="og:title" content="{{.Title}}">
 <meta property="og:image" content="{{.ImgURL}}">
+<meta property="og:image:type" content="image/png">
 <meta property="og:url" content="{{.PageURL}}">
 <meta property="og:type" content="website">
 {{if .SiteName}}<meta property="og:site_name" content="{{.SiteName}}">

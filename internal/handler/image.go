@@ -94,8 +94,25 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	hash := strings.TrimPrefix(r.URL.Path, "/")
 	hash = strings.TrimSuffix(hash, "/")
 
+	serveImage := strings.HasSuffix(hash, ".png")
+	if serveImage {
+		hash = strings.TrimSuffix(hash, ".png")
+	}
+
 	if !h.svc.Exists(hash) {
 		response.Error(w, http.StatusNotFound, "not_found", "screenshot not found")
+		return
+	}
+
+	if serveImage {
+		data, err := h.svc.Get(hash)
+		if err != nil {
+			response.Error(w, http.StatusInternalServerError, "read_error", "failed to read image")
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
 		return
 	}
 

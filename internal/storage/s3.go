@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"context"
+	"io"
 
 	"skarmdump-backend/internal/config"
 
@@ -41,4 +42,17 @@ func (s *S3) Exists(hash string) bool {
 		Key:    &key,
 	})
 	return err == nil
+}
+
+func (s *S3) Read(hash string) ([]byte, error) {
+	key := hash + ".png"
+	out, err := s.client.GetObject(context.TODO(), &s3.GetObjectInput{
+		Bucket: &s.cfg.S3Bucket,
+		Key:    &key,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer out.Body.Close()
+	return io.ReadAll(out.Body)
 }
