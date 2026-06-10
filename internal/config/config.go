@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	Port       string
-	Domain     string
-	SiteName   string
-	LocalPath  string
-	HashLength int
+	Port        string
+	Domain      string
+	SiteName    string
+	LocalPath   string
+	HashLength  int
+	MaxFileSize int64
 
 	S3Bucket string
 	S3Region string
@@ -37,8 +38,9 @@ func Load() *Config {
 		S3Region: get("S3_REGION", ""),
 		S3URL:    get("S3_URL", ""),
 
-		APIKey:     get("API_KEY", ""),
-		HashLength: getInt("HASH_LENGTH", 12),
+		APIKey:      get("API_KEY", ""),
+		HashLength:  getInt("HASH_LENGTH", 12),
+		MaxFileSize: getInt64("MAX_FILE_SIZE_MB", 10) * 1024 * 1024,
 	}
 }
 
@@ -81,6 +83,15 @@ func get(k, d string) string {
 func getInt(k string, d int) int {
 	if v := os.Getenv(k); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return d
+}
+
+func getInt64(k string, d int64) int64 {
+	if v := os.Getenv(k); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 64); err == nil {
 			return n
 		}
 	}

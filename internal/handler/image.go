@@ -56,6 +56,13 @@ func (h *Handler) Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.ContentLength > h.cfg.MaxFileSize {
+		response.Error(w, http.StatusRequestEntityTooLarge, "file_too_large", "file exceeds maximum allowed size")
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, h.cfg.MaxFileSize)
+
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "missing_image", "image file is required")
