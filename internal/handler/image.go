@@ -4,9 +4,11 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"skarmdump-backend/internal/config"
+	"skarmdump-backend/internal/page"
 	"skarmdump-backend/internal/ratelimit"
 	"skarmdump-backend/internal/response"
 	"skarmdump-backend/internal/service"
@@ -49,10 +51,22 @@ func (h *Handler) Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if status, code, msg := h.checkUserAgent(r); status != http.StatusOK {
+		response.Error(w, status, code, msg)
+		return
+	}
+
 	if !h.rl.Allow(ip(r), time.Second) {
 		response.Error(w, http.StatusTooManyRequests, "rate_limit", "rate limit exceeded")
 		return
 	}
+
+	if r.ContentLength > h.cfg.MaxFileSize {
+		response.Error(w, http.StatusRequestEntityTooLarge, "file_too_large", "file exceeds maximum allowed size")
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, h.cfg.MaxFileSize)
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
@@ -89,5 +103,37 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.NotFound(w, r) // nginx будет отдавать
+	hash := strings.TrimPrefix(r.URL.Path, "/")
+	hash = strings.TrimSuffix(hash, "/")
+
+	serveImage := strings.HasSuffix(hash, ".png")
+	if serveImage {
+		hash = strings.TrimSuffix(hash, ".png")
+	}
+
+	if !h.svc.Exists(hash) {
+		response.Error(w, http.StatusNotFound, "not_found", "screenshot not found")
+		return
+	}
+
+	if serveImage {
+		data, err := h.svc.Get(hash)
+		if err != nil {
+			response.Error(w, http.StatusInternalServerError, "read_error", "failed to read image")
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	page.RenderOGPage(w, page.OGData{
+		Title:    "Screenshot " + hash,
+		ImgURL:   page.OGImgURL(h.cfg.Domain, hash),
+		PageURL:  page.OGPageURL(h.cfg.Domain, hash),
+		SiteName: h.cfg.SiteName,
+	})
 }

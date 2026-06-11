@@ -2,35 +2,47 @@ package config
 
 import (
 	"bufio"
+	"net/url"
 	"os"
+	"strconv"
 	"strings"
 )
 
 type Config struct {
-	Port      string
-	Domain    string
-	LocalPath string
+	Port        string
+	Domain      string
+	SiteName    string
+	LocalPath   string
+	HashLength  int
+	MaxFileSize int64
 
 	S3Bucket string
 	S3Region string
 	S3URL    string
 
-	APIKey string
+	APIKey    string
+	UserAgent string
 }
 
 func Load() *Config {
 	loadDotEnv(".env")
 
+	domain := strings.TrimRight(get("DOMAIN", "http://localhost:8080"), "/")
+
 	return &Config{
 		Port:      get("PORT", "8080"),
-		Domain:    strings.TrimRight(get("DOMAIN", "http://localhost:8080"), "/"),
+		Domain:    domain,
+		SiteName:  siteName(domain),
 		LocalPath: get("LOCAL_PATH", "./img"),
 
 		S3Bucket: get("S3_BUCKET", ""),
 		S3Region: get("S3_REGION", ""),
 		S3URL:    get("S3_URL", ""),
 
-		APIKey: get("API_KEY", ""),
+		APIKey:      get("API_KEY", ""),
+		UserAgent:   get("USER_AGENT", ""),
+		HashLength:  getInt("HASH_LENGTH", 12),
+		MaxFileSize: getInt64("MAX_FILE_SIZE_MB", 10) * 1024 * 1024,
 	}
 }
 
@@ -68,4 +80,38 @@ func get(k, d string) string {
 		return v
 	}
 	return d
+}
+
+func getInt(k string, d int) int {
+	if v := os.Getenv(k); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+	}
+	return d
+}
+
+func getInt64(k string, d int64) int64 {
+	if v := os.Getenv(k); v != "" {
+		if n, err := strconv.ParseInt(v, 10, 64); err == nil {
+			return n
+		}
+	}
+	return d
+}
+
+func siteName(domain string) string {
+	u, err := url.Parse(domain)
+	if err != nil || u.Host == "" {
+		return "Skarmdump app"
+	}
+
+	host := u.Host
+	if idx := strings.LastIndex(host, ":"); idx > 0 {
+		host = host[:idx]
+	}
+	if host == "" || host == "localhost" {
+		return "Skarmdump app"
+	}
+	return host
 }

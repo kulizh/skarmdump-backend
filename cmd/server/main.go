@@ -17,7 +17,7 @@ func main() {
 	local := storage.NewLocal(cfg.LocalPath)
 	s3 := storage.NewS3(cfg)
 
-	svc := service.New(local, s3)
+	svc := service.New(local, s3, cfg.HashLength)
 
 	rl := ratelimit.New()
 
