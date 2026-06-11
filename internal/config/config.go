@@ -22,6 +22,9 @@ type Config struct {
 
 	APIKey    string
 	UserAgent string
+
+	ResizeImages bool
+	Sharpen      bool
 }
 
 func Load() *Config {
@@ -39,10 +42,12 @@ func Load() *Config {
 		S3Region: get("S3_REGION", ""),
 		S3URL:    get("S3_URL", ""),
 
-		APIKey:      get("API_KEY", ""),
-		UserAgent:   get("USER_AGENT", ""),
-		HashLength:  getInt("HASH_LENGTH", 12),
-		MaxFileSize: getInt64("MAX_FILE_SIZE_MB", 10) * 1024 * 1024,
+		APIKey:       get("API_KEY", ""),
+		UserAgent:    get("USER_AGENT", ""),
+		HashLength:   getInt("HASH_LENGTH", 12),
+		MaxFileSize:  getInt64("MAX_FILE_SIZE_MB", 10) * 1024 * 1024,
+		ResizeImages: getBool("RESIZE_IMAGES", true),
+		Sharpen:      getBool("SHARPEN", false),
 	}
 }
 
@@ -95,6 +100,15 @@ func getInt64(k string, d int64) int64 {
 	if v := os.Getenv(k); v != "" {
 		if n, err := strconv.ParseInt(v, 10, 64); err == nil {
 			return n
+		}
+	}
+	return d
+}
+
+func getBool(k string, d bool) bool {
+	if v := os.Getenv(k); v != "" {
+		if b, err := strconv.ParseBool(v); err == nil {
+			return b
 		}
 	}
 	return d

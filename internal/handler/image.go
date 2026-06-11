@@ -32,7 +32,7 @@ func ip(r *http.Request) string {
 
 func (h *Handler) authenticate(r *http.Request) (int, string, string) {
 	if h.cfg.APIKey == "" {
-		return http.StatusOK, "", "" // ключ не настроен — пропускаем
+		return http.StatusOK, "", ""
 	}
 
 	key := r.Header.Get("Authorization")
@@ -106,8 +106,14 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	hash := strings.TrimPrefix(r.URL.Path, "/")
 	hash = strings.TrimSuffix(hash, "/")
 
-	serveImage := strings.HasSuffix(hash, ".png")
-	if serveImage {
+	serveRE := strings.HasSuffix(hash, ".re.png")
+	serveOG := strings.HasSuffix(hash, ".og.png")
+	servePNG := !serveRE && !serveOG && strings.HasSuffix(hash, ".png")
+	if serveRE {
+		hash = strings.TrimSuffix(hash, ".re.png")
+	} else if serveOG {
+		hash = strings.TrimSuffix(hash, ".og.png")
+	} else if servePNG {
 		hash = strings.TrimSuffix(hash, ".png")
 	}
 
@@ -116,7 +122,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if serveImage {
+	if servePNG {
 		data, err := h.svc.Get(hash)
 		if err != nil {
 			response.Error(w, http.StatusInternalServerError, "read_error", "failed to read image")
@@ -128,6 +134,33 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if serveOG {
+		data, err := h.svc.GetOG(hash)
+		if err != nil {
+			response.Error(w, http.StatusInternalServerError, "read_error", "failed to read OG image")
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+		return
+	}
+
+	if serveRE {
+		data, err := h.svc.GetRE(hash)
+		if err != nil {
+			response.Error(w, http.StatusInternalServerError, "read_error", "failed to read RE image")
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		w.WriteHeader(http.StatusOK)
+		w.Write(data)
+		return
+	}
+
+	reURL := strings.TrimRight(h.cfg.Domain, "/") + "/" + hash + ".re.png"
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	page.RenderOGPage(w, page.OGData{
@@ -135,5 +168,6 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		ImgURL:   page.OGImgURL(h.cfg.Domain, hash),
 		PageURL:  page.OGPageURL(h.cfg.Domain, hash),
 		SiteName: h.cfg.SiteName,
+		ReImgURL: reURL,
 	})
 }

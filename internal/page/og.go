@@ -1,6 +1,7 @@
 package page
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strings"
@@ -11,6 +12,7 @@ type OGData struct {
 	ImgURL   string
 	PageURL  string
 	SiteName string
+	ReImgURL string
 }
 
 const ogTemplate = `<!DOCTYPE html>
@@ -29,7 +31,7 @@ const ogTemplate = `<!DOCTYPE html>
 <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-<img src="{{.ImgURL}}" alt="{{.Title}}" style="max-width:100%;height:auto;">
+<img src="{{.ReImgURL}}" alt="{{.Title}}" style="max-width:100%;height:auto;">
 </body>
 </html>`
 
@@ -44,5 +46,5 @@ func OGPageURL(domain, hash string) string {
 }
 
 func OGImgURL(domain, hash string) string {
-	return strings.TrimRight(domain, "/") + "/" + hash + ".png"
+	return fmt.Sprintf("%s/%s.og.png", strings.TrimRight(domain, "/"), hash)
 }

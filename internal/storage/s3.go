@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 
 	"skarmdump-backend/internal/config"
@@ -24,9 +25,27 @@ func NewS3(cfg *config.Config) *S3 {
 	}
 }
 
-func (s *S3) Save(hash string, data []byte) error {
-	key := hash + ".png"
+func s3key(hash, subdir, ext string) string {
+	if subdir == "" {
+		return fmt.Sprintf("%s.%s", hash, ext)
+	}
+	return fmt.Sprintf("%s/%s.%s", subdir, hash, ext)
+}
 
+func (s *S3) SavePNG(hash string, data []byte) error {
+	return s.put(hash, "", "png", data)
+}
+
+func (s *S3) SaveOG(hash string, data []byte) error {
+	return s.put(hash, "og", "png", data)
+}
+
+func (s *S3) SaveRE(hash string, data []byte) error {
+	return s.put(hash, "re", "png", data)
+}
+
+func (s *S3) put(hash, subdir, ext string, data []byte) error {
+	key := s3key(hash, subdir, ext)
 	_, err := s.client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: &s.cfg.S3Bucket,
 		Key:    &key,
@@ -45,7 +64,19 @@ func (s *S3) Exists(hash string) bool {
 }
 
 func (s *S3) Read(hash string) ([]byte, error) {
-	key := hash + ".png"
+	return s.get(hash, "", "png")
+}
+
+func (s *S3) ReadOG(hash string) ([]byte, error) {
+	return s.get(hash, "og", "png")
+}
+
+func (s *S3) ReadRE(hash string) ([]byte, error) {
+	return s.get(hash, "re", "png")
+}
+
+func (s *S3) get(hash, subdir, ext string) ([]byte, error) {
+	key := s3key(hash, subdir, ext)
 	out, err := s.client.GetObject(context.TODO(), &s3.GetObjectInput{
 		Bucket: &s.cfg.S3Bucket,
 		Key:    &key,
