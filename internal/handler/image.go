@@ -51,6 +51,11 @@ func (h *Handler) Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if status, code, msg := h.checkUserAgent(r); status != http.StatusOK {
+		response.Error(w, status, code, msg)
+		return
+	}
+
 	if !h.rl.Allow(ip(r), time.Second) {
 		response.Error(w, http.StatusTooManyRequests, "rate_limit", "rate limit exceeded")
 		return
