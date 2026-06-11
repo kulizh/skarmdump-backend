@@ -27,6 +27,9 @@ func main() {
 	mux.HandleFunc("/upload", h.Upload)
 	mux.HandleFunc("/", h.Get)
 
+	var srv http.Handler = mux
+	srv = handler.UserAgentMiddleware(cfg.UserAgent, srv)
+
 	log.Println("start:", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, mux))
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, srv))
 }

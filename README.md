@@ -19,6 +19,7 @@ S3_REGION=
 S3_URL=
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
+USER_AGENT=
 ```
 
 | Переменная | Обязательно | По умолчанию | Описание |
@@ -27,6 +28,7 @@ AWS_SECRET_ACCESS_KEY=
 | `DOMAIN` | да | — | Базовый URL (возвращается в ответе) |
 | `LOCAL_PATH` | нет | `./img` | Директория для локального хранения |
 | `API_KEY` | нет | — | Ключ авторизации (см. раздел Авторизация) |
+| `USER_AGENT` | нет | — | Разрешить запросы только с этого User-Agent, если не указан, принимаем всё|
 | `HASH_LENGTH` | нет | `12` | Длина хеша в символах |
 | `MAX_FILE_SIZE_MB` | нет | `10` | Максимальный размер файла в МБ |
 | `S3_BUCKET` | для S3 | — | Имя S3-бакета |
@@ -133,6 +135,7 @@ GET /abc12345
 |---|---|---|---|
 | 401 | `auth_required` | `authorization header is required` | Не передан заголовок `Authorization` |
 | 403 | `invalid_key` | `invalid API key` | Неверный API-ключ |
+| 403 | `bad_user_agent` | `request from this User-Agent is not allowed` | User-Agent не совпадает с `USER_AGENT` |
 | 400 | `missing_image` | `image file is required` | Не передан файл в поле `image` |
 | 400 | `read_error` | `cannot read uploaded image` | Ошибка чтения файла |
 | 400 | `invalid_image` | `only PNG files are accepted` | Файл не является PNG |

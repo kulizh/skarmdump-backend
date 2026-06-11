@@ -20,7 +20,8 @@ type Config struct {
 	S3Region string
 	S3URL    string
 
-	APIKey string
+	APIKey    string
+	UserAgent string
 }
 
 func Load() *Config {
@@ -39,6 +40,7 @@ func Load() *Config {
 		S3URL:    get("S3_URL", ""),
 
 		APIKey:      get("API_KEY", ""),
+		UserAgent:   get("USER_AGENT", ""),
 		HashLength:  getInt("HASH_LENGTH", 12),
 		MaxFileSize: getInt64("MAX_FILE_SIZE_MB", 10) * 1024 * 1024,
 	}
