@@ -1,24 +1,40 @@
 package page
 
 import (
+	"embed"
 	"html/template"
 	"io"
 	"strings"
 )
+
+//go:embed style.css
+var cssFS embed.FS
+
+var cssContent = mustReadCSS()
+
+func mustReadCSS() string {
+	b, err := cssFS.ReadFile("style.css")
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
+}
 
 type OGData struct {
 	Title    string
 	ImgURL   string
 	PageURL  string
 	SiteName string
+	Style    string
 }
 
-const ogTemplate = `<!DOCTYPE html>
+const ogTemplateHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{.Title}}</title>
+<style>{{.Style}}</style>
 <meta property="og:title" content="{{.Title}}">
 <meta property="og:image" content="{{.ImgURL}}">
 <meta property="og:image:type" content="image/png">
@@ -29,13 +45,14 @@ const ogTemplate = `<!DOCTYPE html>
 <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-<img src="{{.ImgURL}}" alt="{{.Title}}" style="max-width:100%;height:auto;">
+<img src="{{.ImgURL}}" alt="{{.Title}}">
 </body>
 </html>`
 
-var tpl = template.Must(template.New("og").Parse(ogTemplate))
+var tpl = template.Must(template.New("og").Parse(ogTemplateHTML))
 
 func RenderOGPage(w io.Writer, data OGData) error {
+	data.Style = cssContent
 	return tpl.Execute(w, data)
 }
 
