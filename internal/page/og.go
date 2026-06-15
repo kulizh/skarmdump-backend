@@ -12,12 +12,12 @@ var cssFS embed.FS
 
 var cssContent = mustReadCSS()
 
-func mustReadCSS() string {
+func mustReadCSS() template.CSS {
 	b, err := cssFS.ReadFile("style.css")
 	if err != nil {
 		panic(err)
 	}
-	return string(b)
+	return template.CSS(b)
 }
 
 type OGData struct {
@@ -25,7 +25,7 @@ type OGData struct {
 	ImgURL   string
 	PageURL  string
 	SiteName string
-	Style    string
+	Style    template.CSS
 }
 
 const ogTemplateHTML = `<!DOCTYPE html>
