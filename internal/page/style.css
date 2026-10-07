@@ -16,6 +16,7 @@ img {
   display: block;
   max-width: 100%;
   height: auto;
+  max-height: 100vh;
 }
 
 @media (max-width: 768px) {
